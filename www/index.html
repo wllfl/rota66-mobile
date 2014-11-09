@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<!--
+    Copyright (c) 2012-2014 Adobe Systems Incorporated. All rights reserved.
+
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="msapplication-tap-highlight" content="no" />
+        <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
+        <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=medium-dpi" />
+        <title>Rota66</title>
+        <link rel="stylesheet" href="css/jquery_mobile.css" />
+        <link rel="stylesheet" href="css/tema.min.css" />
+        <link rel="stylesheet" href="css/index.css" />
+    </head>
+    <body>
+        <!-- Página contendo o mapa dos estabelecimentos pŕoximos -->
+        <div data-role="page" id="mapa" data-theme="c">
+            <div data-role="header" class="app-header">
+                <span class='titulo'>Rota66</span>
+                <a href="#" data-icon="power" class="ui-btn-right exit" data-role="button" data-theme="c"></a>
+            </div>
+            <div data-role="navbar">
+                <ul>
+                    <li><a data-transition="slide" href="#mapa" class="ui-btn-active ui-state-persist">Mapa</a></li>
+                    <li><a data-transition="slide" href="#lista">Lista</a></li>
+                    <li><a data-transition="slide" href="#sobre">Sobre</a></li>
+                </ul>
+            </div>
+            <div data-role="content" id="box-mapa">
+                <span class='texto-load'>Aguarde, carregando mapa ...</span>
+            </div>
+        </div>
+
+        <!-- Página com a lista de cupons disponíveis nas proximidades -->
+        <div data-role="page" id="lista" data-theme="c">
+            <div data-role="header" class="app-header">
+                <span class='titulo'>Rota66</span>
+                <a href="#" data-icon="power" class="ui-btn-right exit" data-role="button"></a>
+            </div>
+            <div data-role="navbar">
+                <ul>
+                    <li><a data-transition="slide" href="#mapa">Mapa</a></li>
+                    <li><a data-transition="slide" href="#lista" class="ui-btn-active ui-state-persist">Lista</a></li>
+                    <li><a data-transition="slide" href="#sobre">Sobre</a></li>
+                </ul>
+            </div>
+            <div data-role="content">
+                
+            </div>
+        </div>
+
+        <!-- Página com informações sobre A App -->
+        <div data-role="page" id="sobre" data-theme="c">
+            <div data-role="header" class="app-header">
+                <span class='titulo'>Rota66</span>
+                <a href="#" data-icon="power" class="ui-btn-right exit" data-role="button"></a>
+            </div>
+            <div data-role="navbar">
+                <ul>
+                    <li><a data-transition="slide" href="#mapa">Mapa</a></li>
+                    <li><a data-transition="slide" href="#lista">Lista</a></li>
+                    <li><a data-transition="slide" href="#sobre" class="ui-btn-active ui-state-persist">Sobre</a></li>
+                </ul>
+            </div>
+            <div data-role="content">
+                
+            </div>
+        </div>
+        <script type="text/javascript" src="cordova.js"></script>
+        <script type="text/javascript" src="js/jquery.js"></script>
+        <script type="text/javascript" src="js/jquery_mobile.js"></script>
+        <script type="text/javascript" src="js/fastclick.js"></script>        
+        <script type="text/javascript">
+            window.onload = initialize;
+
+            function initialize() {
+                loadScript();
+            }
+
+            /*
+            * Função para atrasar o carregamento da página somente após o término do download da API
+            */
+            function loadScript() {
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyBLHsy2KkQxyqebEjxqDYI5lSKIi-2ORH8&callback=onDeviceReady";
+                document.body.appendChild(script);
+            }
+
+            function onDeviceReady(){
+
+                FastClick.attach(document.body);
+
+                if (getConexao()){
+                    var option;
+                    option = {
+                        maximumAge: 30000,
+                        timeout: 60000,
+                        enableHighAccuracy: true 
+                    }
+                    navigator.geolocation.getCurrentPosition(onSuccess, onError, option);
+                }else{
+                    $('#box-mapa').css('background-image', 'none');
+                    $('.texto-load').html('Não foi possível carregar o mapa, você não possui conexão com a internet!');
+                }
+
+                function loadScript() {
+                    var script = document.createElement('script');
+                    script.type = 'text/javascript';
+                    script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyBLHsy2KkQxyqebEjxqDYI5lSKIi-2ORH8";
+                    document.body.appendChild(script);
+                    alert('teste');
+                }
+
+                $('.exit').click(function(){
+                    navigator.notification.confirm(
+                        'Deseja fechar o aplicativo?', // message
+                        function onConfirm(buttonIndex) {
+                            if(buttonIndex == 2){
+                                if(navigator.app){
+                                   navigator.app.exitApp();
+                                }else if(navigator.device){
+                                   navigator.device.exitApp();
+                                }
+                            }
+                        },           
+                        'Confirmação',           
+                        ['Cancelar','OK']     
+                    );
+                });
+
+                setInterval(
+                        function(){
+                            if(getConexao()) {
+                                var option;
+                                    option = {
+                                        timeout: 60000,
+                                        enableHighAccuracy: true 
+                                    }
+                                navigator.geolocation.getCurrentPosition(onSuccess, onError, option);
+                             }                    
+                        }, 60000);
+
+
+                /*
+                * Função para recebimento dos dados se houver sucesso na requisição
+                * @param position = objeto contendo as coordenadas de latitude de longitude
+                */
+                function onSuccess(position) {
+                    EnviaCoordenadas(device.uuid, position.coords.latitude, position.coords.longitude);
+                     
+                    // Instância objeto map  
+                    var map = new google.maps.Map(document.getElementById("box-mapa"),{
+                        center:new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+                        zoom:15,
+                        mapTypeId:google.maps.MapTypeId.ROADMAP
+                    });
+
+                    // Instância objeto maker, marcador no mapa
+                    var marker=new google.maps.Marker({
+                        position:new google.maps.LatLng(position.coords.latitude, position.coords.longitude)
+                    });
+
+                    // Instância objeto circle, para criar o círuclo virtual
+                    var circle = new google.maps.Circle({
+                        center:new google.maps.LatLng(position.coords.latitude, position.coords.longitude),
+                        radius:500,
+                        strokeColor:"#0000FF",
+                        strokeOpacity:0.8,
+                        strokeWeight:2,
+                        fillColor:"#0000FF",
+                        fillOpacity:0.1
+                    });
+
+                    marker.setMap(map);
+                    circle.setMap(map);
+                }
+
+                /*
+                * Função para recebimento dos dados se houver erro na requisição
+                * @param error = objeto contendo a descrição do erro
+                */
+                function onError(error) {
+                   var mensage = 'Erro na localização: ' + error.message;
+                   $('#box-mapa').css('background-image', 'none');
+                   $('.texto-load').html('Não foi possível carregar o mapa, houve um erro ao tentar recuperar sua localização!');
+                }
+
+                /*
+                * Função para verificar se existe conexão com a internet
+                * @return Booleano = TRUE existe conexão, FALSE sem conexão
+                */
+                function getConexao(){
+                    var networkState = navigator.connection.type;
+
+                    var states = {};
+                    states[Connection.UNKNOWN]  = true;
+                    states[Connection.ETHERNET] = true;
+                    states[Connection.WIFI]     = true;
+                    states[Connection.CELL_2G]  = true;
+                    states[Connection.CELL_3G]  = true;
+                    states[Connection.CELL_4G]  = true;
+                    states[Connection.CELL]     = true;
+                    states[Connection.NONE]     = false;
+
+                   return states[networkState];
+                }
+
+                /*
+                * Função para enviar dados da localização atual do dispositivo
+                * @param id = UUID do dispositivo
+                * @param lt = Latitude 
+                * @param lg = Longitude
+                */
+                function EnviaCoordenadas(id, lt, lg){
+                    var dados = "uuid="+id+"&latitude="+lt+"&longitude="+lg;
+
+                    $.ajax({
+                        type: "POST",
+                        data: dados,
+                        url: "http://www.william-sistemas.com.br/rota66/admin/webservice/posicao_dispositivo.php",
+                        dataType: "text",
+                        success: function( response ){
+                            
+                        }
+                    });
+                }
+            }
+        </script>
+    </body>
+</html>
